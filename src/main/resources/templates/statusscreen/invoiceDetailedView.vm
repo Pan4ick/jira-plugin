@@ -1,0 +1,74 @@
+<table>
+    <tr>
+        <td>
+            Полная сумма:
+        </td>
+        <td>
+            $number.format($carriers.get(0).getFullAmount())
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            Дата оплаты
+        </td>
+        <td>
+            Проценты
+        </td>
+        <td>
+            Сумма к оплате
+        </td>
+        <td>
+            #if ($!carriers.get(1).getDatePost())
+                Дата реальной оплаты
+            #end
+        </td>
+        <td>
+            #if ($!carriers.get(1).getAmountPost())
+                Pеальная сумма оплаты
+            #end
+        </td>
+    </tr>
+    #set($i = 0)
+    #foreach ($carrier in $carriers)
+        #if($i > 0)
+            <tr>
+                <td>
+                    $date.format('dd.MM.yyyy',$!carrier.getDate())
+                </td>
+                <td>
+                    #set($percent = $!carrier.getAmount() / $!carriers.get(0).getFullAmount() * 100)
+                    $number.format($percent)%
+                </td>
+                <td>
+                    $number.format($!carrier.getAmount())
+                </td>
+                <td>
+                    $!date.format('dd.MM.yyyy',$!carrier.getDatePost())
+                </td>
+                <td>
+                    #if($!carrier.getAmountPost() != 0.0)
+                                $!number.format($!carrier.getAmountPost())
+                            #end
+                </td>
+            </tr>
+        #end
+        #set($i = ($i + 1))
+    #end
+
+    #set($ost = $!carriers.get(0).getFullAmount())
+    #set ($index = $i - 1)
+    #if ($index > 0)
+        #foreach ($a in [1..$index])
+            #set($ost = $ost - ($!carriers.get($a).getAmountPost()))
+        #end
+    #end
+    <tr>
+        <td>
+            Остаток:
+        </td>
+        <td>
+            $!number.format($ost)
+        </td>
+    </tr>
+</table>

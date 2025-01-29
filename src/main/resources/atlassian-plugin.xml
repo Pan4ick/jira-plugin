@@ -75,6 +75,14 @@
         <condition class="com.enviogroup.plugins.conditions.TenderWebPanelCondition"/>
     </web-panel>
 
+    <!-- Панель договора -->
+    <web-panel key="agreement-screen" name="Agreement Screen" location="atl.jira.view.issue.left.context" weight="120">
+        <context-provider class="com.enviogroup.plugins.status.screen.AgreementScreen"/>
+        <resource type="velocity" name="view" location="templates/agreementscreen/view.vm"/>
+        <label key="Документация"/>
+        <condition class="com.enviogroup.plugins.conditions.AgreementWebPanelCondition"/>
+    </web-panel>
+
     <web-resource key="status-screen-resources" name="Status Screen Web Resources">
         <resource type="download" name="status-screen.js" location="/js/status-screen.js"/>
         <resource type="download" name="status-screen.css" location="/css/status-screen.css"/>
@@ -117,5 +125,14 @@
     <rest name="Tenders Rest Resource" i18n-name-key="tenders-rest-resource.name" key="tenders-rest-resource" path="/tendersrestresource" version="1">
         <description key="tenders-rest-resource.description">The Tenders Rest Resource Plugin</description>
     </rest>
+
+    <!-- Панель тендера -->
+    <web-panel key="tender_right" name="document" location="atl.jira.view.issue.right.context" weight="110">
+        <context-provider class="com.enviogroup.plugins.panel.tender.RightPanel"/>
+        <resource type="velocity" name="view" location="templates/panel/tender/view.vm"/>
+        <label key="Информация"/>
+        <condition class="com.enviogroup.plugins.conditions.TenderWebPanelCondition"/>
+        <condition class="com.enviogroup.plugins.conditions.ChiefUserWebPanelCondition"/>
+    </web-panel>
 
 </atlassian-plugin>

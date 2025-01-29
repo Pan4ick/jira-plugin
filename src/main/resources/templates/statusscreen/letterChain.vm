@@ -1,0 +1,31 @@
+#set($firstLetter = $letterChain.get(0))
+<h2 class="centered">$firstLetter.getSummary()</h2>
+<h5 class="centered" style="margin-top: 0px;">
+    Инициатор
+    #if($firstLetter.getOrganisations())
+    #foreach($organisation in $firstLetter.getOrganisations())
+        #parse("templates/statusscreen/organisation.vm")
+    #end
+#end
+</h5>
+#foreach($letter in $letterChain)
+<div class="aui-group">
+    #if($letter.getLetterType() == "Входящее письмо")
+        <div class="aui-item">
+
+        </div>
+        <div class="aui-item" style="width: 40px; vertical-align: middle;">
+            <span class="aui-icon aui-icon-small aui-iconfont-arrow-left">arrow</span>
+        </div>
+        #parse("templates/statusscreen/letter.vm")
+
+    #else
+        #parse("templates/statusscreen/letter.vm")
+        <div class="aui-item" style="width: 40px; vertical-align: middle;">
+            <span class="aui-icon aui-icon-small aui-iconfont-arrow-right">arrow</span>
+        </div>
+        <div class="aui-item">
+        </div>
+    #end
+</div>
+#end

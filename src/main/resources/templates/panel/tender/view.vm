@@ -1,0 +1,5 @@
+#if ($issue)
+    #if ($labelnottogo)
+    <span class="aui-lozenge aui-lozenge-error">Просрочен срок согласования</span>
+    #end
+#end

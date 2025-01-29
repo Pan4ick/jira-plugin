@@ -19,12 +19,12 @@ public class ModelMapper {
     public ModelMapper() {
     }
 
-    public TenderModel getModel(String issueId) {
+    public TenderModel getTenderModel(String issueId) {
         Issue issue = issueWorker.getIssue(issueId);
-        return getModel(issue);
+        return getTenderModel(issue);
     }
 
-    public TenderModel getModel(Issue issue) {
+    public TenderModel getTenderModel(Issue issue) {
         if (issue == null) {
             return new TenderModel();
         }
@@ -86,18 +86,49 @@ public class ModelMapper {
         return model;
     }
 
-    public List<BaseLetterModel> lettersModelListFactory(Issue issue, IssueWorker issueWorker, Long cfId) {
-        List<BaseLetterModel> lettersList = new LinkedList<>();
-        if (!issueWorker.getMutableIssuesList(issue, cfId).isEmpty()) {
-            for (Issue letterIssue : (issueWorker.getMutableIssuesList(issue, cfId))) {
+    public AgreementModel getAgreementModel(Issue issue) {
+        if (issue == null) {
+            return new AgreementModel();
+        }
+        AgreementModel model = new AgreementModel();
+        model.setTender(getTenderModel( issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_10326).get(0)));
+        model.setKey(issue.getKey());
+        model.setSummary(issue.getSummary());
+        model.setStatus(issue.getStatus());
+        Issue org = (issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_10069)).get(0);
+        if (isOrgOurs(org)) {
+            org = (issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_10067)).get(0);
+        }
+        model.setOrganisation(organisationModelFactory(org, issueWorker));
+        String vatString = issueWorker.getStringValueFromLazyLoadedOptionCustomField(CUSTOM_FIELD_10113, issue);
+        double vatDouble;
+        try {
+            vatDouble = Double.parseDouble(vatString) / 100;
+        } catch (Exception e) {
+            vatDouble = 0D;
+        }
+        model.setValueAddedTax(vatDouble);
+        model.setAmount((issueWorker.getDoubleCustomFieldValue(CUSTOM_FIELD_10072, issue)));
+        model.setSpecificationsList(specificationModelListFactory(issue, issueWorker));
+        model.setInputInvoicesList(invoiceModelListFactory(issue, issueWorker, CUSTOM_FIELD_11201));
+        model.setShipmentsList(shipmentModelListFactory(issue, issueWorker));
+        return model;
+    }
+
+    public List<BaseLetterModel> lettersModelListFactory(Issue issue, IssueWorker issueWorker, Long customFieldId) {
+        ArrayList<MutableIssue> mutableLettersList = issueWorker.getMutableIssuesList(issue, customFieldId);
+        HashMap<String, BaseLetterModel> lettersHashMap = new HashMap<>();
+        if (!mutableLettersList.isEmpty()) {
+            List<BaseLetterModel> lettersList = new LinkedList<>();
+            for (Issue letterIssue : mutableLettersList) {
                 String letterTypeId = Objects.requireNonNull(letterIssue.getIssueType()).getId();
                 if (letterTypeId.equals(INPUT_LETTER_ISSUE_TYPE_ID)) {
-                    InputLetterModel inputLetter = inputLetterModelFactory(letterIssue, null);
+                    InputLetterModel inputLetter = inputLetterModelFactory(lettersHashMap, letterIssue, null);
                     if (inputLetter != null) {
                         lettersList.add(inputLetter);
                     }
                 } else if (letterTypeId.equals(OUTPUT_LETTER_ISSUE_TYPE_ID)) {
-                    OutputLetterModel outputLetter = outputLetterModelFactory(letterIssue, null);
+                    OutputLetterModel outputLetter = outputLetterModelFactory(lettersHashMap, letterIssue, null);
                     if (outputLetter != null) {
                         lettersList.add(outputLetter);
                     }
@@ -111,44 +142,59 @@ public class ModelMapper {
 
     private final List<String> letterModels = new ArrayList<>();
 
-    private OutputLetterModel outputLetterModelFactory(Issue issue, InputLetterModel parentModel) {
-        if (letterModels.contains(issue.getKey())) {
+    private OutputLetterModel outputLetterModelFactory(HashMap<String, BaseLetterModel> lettersHashMap, Issue issue, InputLetterModel parentModel) {
+        if (lettersHashMap.containsKey(issue.getKey())) {
             return null;
         }
         OutputLetterModel outputLetter = new OutputLetterModel();
         outputLetter.setKey(issue.getKey());
         outputLetter.setStatus(issue.getStatus());
         outputLetter.setSummary(issue.getSummary());
+        outputLetter.setCreated(issue.getCreated());
+        outputLetter.setResolution(issueWorker.getStringCustomFieldValue(CUSTOM_FIELD_10607, issue));
+        outputLetter.setOutNumber(issueWorker.getStringCustomFieldValue(CUSTOM_FIELD_10208, issue));
+        outputLetter.setInNumber(issueWorker.getStringCustomFieldValue(CUSTOM_FIELD_10207, issue));
+        outputLetter.setType(issueWorker.getStringValueFromLazyLoadedOptionCustomField(CUSTOM_FIELD_10210, issue));
+        for (Issue org : issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_10502)) {
+            outputLetter.addOrganisation(organisationModelFactory(org, issueWorker));
+        }
+
+        lettersHashMap.put(outputLetter.getKey(), outputLetter);
         if (parentModel != null) {
             outputLetter.setParentLetter(parentModel);
         } else if (!issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_10541).isEmpty()) {
-            outputLetter.setParentLetter(inputLetterModelFactory(issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_10541).get(0), null));
+            outputLetter.setParentLetter(inputLetterModelFactory(lettersHashMap, issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_10541).get(0), null));
         }
         if (!issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_12300).isEmpty()) {
-            outputLetter.setChildLetter(inputLetterModelFactory(issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_12300).get(0), outputLetter));
+            outputLetter.setChildLetter(inputLetterModelFactory(lettersHashMap, issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_12300).get(0), outputLetter));
         }
-        letterModels.add(outputLetter.getKey());
         return outputLetter;
-
     }
 
-    private InputLetterModel inputLetterModelFactory(Issue issue, OutputLetterModel parentModel) {
-        if (letterModels.contains(issue.getKey())) {
+    private InputLetterModel inputLetterModelFactory(HashMap<String, BaseLetterModel> lettersHashMap, Issue issue, OutputLetterModel parentModel) {
+        if (lettersHashMap.containsKey(issue.getKey())) {
             return null;
         }
         InputLetterModel inputLetter = new InputLetterModel();
         inputLetter.setKey(issue.getKey());
         inputLetter.setStatus(issue.getStatus());
         inputLetter.setSummary(issue.getSummary());
+        inputLetter.setCreated(issue.getCreated());
+        inputLetter.setInNumber(issueWorker.getStringCustomFieldValue(CUSTOM_FIELD_10208, issue));
+        inputLetter.setOutNumber(issueWorker.getStringCustomFieldValue(CUSTOM_FIELD_10207, issue));
+        inputLetter.setType(issueWorker.getStringValueFromLazyLoadedOptionCustomField(CUSTOM_FIELD_10210, issue));
+        for (Issue org : issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_10504)) {
+            inputLetter.addOrganisation(organisationModelFactory(org, issueWorker));
+        }
+        lettersHashMap.put(inputLetter.getKey(), inputLetter);
         if (parentModel != null) {
             inputLetter.setParentLetter(parentModel);
         } else if (!issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_12301).isEmpty()) {
-            inputLetter.setParentLetter(outputLetterModelFactory(issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_12301).get(0), null));
+            inputLetter.setParentLetter(outputLetterModelFactory(lettersHashMap, issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_12301).get(0), null));
         }
         if (!issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_10542).isEmpty()) {
-            inputLetter.setChildLetter(outputLetterModelFactory(issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_10542).get(0), inputLetter));
+            inputLetter.setChildLetter(outputLetterModelFactory(lettersHashMap, issueWorker.getMutableIssuesList(issue, CUSTOM_FIELD_10542).get(0), inputLetter));
         }
-        letterModels.add(inputLetter.getKey());
         return inputLetter;
     }
 
@@ -336,12 +382,12 @@ public class ModelMapper {
             return null;
         }
         letterModels.replaceAll(BaseLetterModel::getFirstParent);
-        letterModels.sort(Comparator.comparingInt(BaseLetterModel::getSize).reversed());
+        letterModels.sort(Comparator.comparingLong(BaseLetterModel::getLongCreated));
         List<List<BaseLetterModel>> lettersChains = new ArrayList<>();
         for (BaseLetterModel letterModel : letterModels) {
             List<BaseLetterModel> chain = new LinkedList<>();
             while (letterModel != null) {
-                chain.add(new BaseLetterModel(letterModel));
+                chain.add(BaseLetterModel.createBaseLetterModel(letterModel));
                 letterModel = letterModel.getChildLetter();
             }
             lettersChains.add(chain);

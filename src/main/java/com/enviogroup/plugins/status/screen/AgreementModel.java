@@ -7,6 +7,7 @@ import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AgreementModel extends IssueModel {
+    private TenderModel tender;
     private Double amount;
     private OrganisationModel organisation;
     private Double valueAddedTax;
@@ -77,5 +78,13 @@ public class AgreementModel extends IssueModel {
 
     public void setShipmentsList(List<ShipmentModel> shipmentsList) {
         this.shipmentsList = shipmentsList;
+    }
+
+    public TenderModel getTender() {
+        return tender;
+    }
+
+    public void setTender(TenderModel tender) {
+        this.tender = tender;
     }
 }

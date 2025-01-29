@@ -1,0 +1,32 @@
+#set($invoiceAmount = false)
+<div class="aui-group">
+    <div class="aui-item">
+        <div class="zoned">Счёт <a href="$baseURL/browse/$invoice.getKey()">$invoice.getKey()</a> $invoice.getSummary()
+
+            #set($organisation = $invoice.getOrganisation())
+            #parse("templates/statusscreen/organisation.vm")
+            #set($organisation = false)
+            <div class="aui-group aui-group-split">
+                <div class="aui-item">
+                    $soyRenderer.render(
+                        'jira.webresources:issue-statuses',
+                        'JIRA.Template.Util.Issue.Status.issueStatusResolver', {
+                        'issueStatus': $invoice.getStatus(),
+                        'isSubtle': true,
+                        'isCompact': false,
+                        'maxWidth': 150
+                    })
+                </div>
+                <div class="aui-item">
+                    #set ($carriers = $invoice.getDetailedInfoicetion())
+                    #parse("templates/statusscreen/invoiceDetailedView.vm")
+                    #set($invoiceAmount = $invoice.getAmount())
+                    #if($invoiceAmount)
+                        Стоимость: $number.format($invoiceAmount)
+                    #end
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

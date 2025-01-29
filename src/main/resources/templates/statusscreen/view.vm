@@ -93,7 +93,6 @@ $webResourceManager.requireResourcesForContext("status-screen-resources")
     </div>
 
     <div class="tabs-pane" id="tab-win-status-2">
-        ##        <h2 class="centered">В разработке</h2>
     #set($agreement = $model.getAgreement())
     #foreach($shipment in $agreement.getShipmentsList())
         #if(!$shipment.getStatus().getId().equals("10501"))
@@ -111,7 +110,9 @@ $webResourceManager.requireResourcesForContext("status-screen-resources")
 
     <div class="tabs-pane" id="tab-win-status-3">
         #foreach($letterChain in $model.getLettersList())
-            #parse("templates/statusscreen/letterchain.vm")
+            <div class="aui-group zoned" style=" margin-bottom: 15px;">
+                #parse("templates/statusscreen/letterChain.vm")
+            </div>
         #end
     </div>
 </div>

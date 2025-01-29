@@ -6,6 +6,10 @@ public class CustomField {
      */
     public static final Long CUSTOM_FIELD_10327 = 10327L;
     /**
+     * Тендер договоры
+     */
+    public static final Long CUSTOM_FIELD_10326 = 10326L;
+    /**
      * Предложения поставщиков
      */
     public static final Long CUSTOM_FIELD_11411 = 11411L;
@@ -145,6 +149,30 @@ public class CustomField {
      * Счета входящие тендеры
      */
     public static final Long CUSTOM_FIELD_10229 = 10229L;
+    /**
+     * Письмо входящее отправитель
+     */
+    public static final Long CUSTOM_FIELD_10504 = 10504L;
+    /**
+     * Письмо исходящее получатель
+     */
+    public static final Long CUSTOM_FIELD_10502 = 10502L;
+    /**
+     * Резолюция
+     */
+    public static final Long CUSTOM_FIELD_10607 = 10607L;
+    /**
+     * Тип письма
+     */
+    public static final Long CUSTOM_FIELD_10210 = 10210L;
+    /**
+     * № Исходящего
+     */
+    public static final Long CUSTOM_FIELD_10208 = 10208L;
+    /**
+     * № Входящего
+     */
+    public static final Long CUSTOM_FIELD_10207 = 10207L;
 
     /**
      * OGR-1 ЭНВИОГРУПП

@@ -27,7 +27,7 @@ public class TendersRestResourceModel {
         ModelMapper modelMapper = new ModelMapper();
         List<TenderModel> issues = new ArrayList<>();
         for (String issueId : issueIds) {
-            issues.add(modelMapper.getModel(issueId));
+            issues.add(modelMapper.getTenderModel(issueId));
         }
         this.tenders = issues;
     }

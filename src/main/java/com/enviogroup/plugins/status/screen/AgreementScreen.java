@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class StatusScreen extends AbstractJiraContextProvider {
+public class AgreementScreen extends AbstractJiraContextProvider {
 
     private static final NumberTool numberTool = new NumberTool(new Locale("ru", "RU"));
 
@@ -21,7 +21,7 @@ public class StatusScreen extends AbstractJiraContextProvider {
         Issue issue = (Issue) jiraHelper.getContextParams().get("issue");
         ModelMapper modelMapper = new ModelMapper();
         Map<String, Object> contextMap = new HashMap<>();
-        contextMap.put("model", modelMapper.getTenderModel(issue));
+        contextMap.put("model", modelMapper.getAgreementModel(issue));
         contextMap.put("number", numberTool);
         contextMap.put("soyRenderer", ComponentAccessor.getComponent(SoyTemplateRendererProvider.class).getRenderer());
         contextMap.put("baseURL", ComponentAccessor.getApplicationProperties().getString("jira.baseurl"));

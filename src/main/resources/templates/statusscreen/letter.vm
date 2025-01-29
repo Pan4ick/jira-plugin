@@ -1,0 +1,45 @@
+<div class="aui-item">
+    <div class="zonedlight">
+        <p>
+            <span class="aui-icon aui-icon-small aui-iconfont-email">$letter.getLetterType()</span>
+            $soyRenderer.render(
+                'jira.webresources:issue-statuses',
+                'JIRA.Template.Util.Issue.Status.issueStatusResolver', {
+                'issueStatus': $letter.getStatus(),
+                'isSubtle': true,
+                'isCompact': false,
+                'maxWidth': 150
+            })<a href="$baseURL/browse/$letter.getKey()" target="_blank">$letter.getKey()</a>
+            $letter.getType()
+            <br/>
+        <h3 style="margin: 0px"> $letter.getSummary()</h3>
+        </p>
+        <h4 style="margin: 0px">Дата: $letter.getCreatedString()</h4>
+
+        #if($letter.getLetterType() == "Входящее письмо")
+            #if($letter.getOutNumber())
+                <h5 style="margin: 0px">№ Исходящего: $letter.getOutNumber()</h5>
+            #end
+            #if($letter.getInNumber())
+                <h5 style="margin: 0px">№ Входящего: $letter.getInNumber()</h5>
+            #end
+
+        #else
+            #if($letter.getOutNumber())
+                <h5 style="margin: 0px">№ Исходящего: $letter.getOutNumber()</h5>
+            #end
+            #if($letter.getInNumber())
+                <h5 style="margin: 0px">№ Входящего: $letter.getInNumber()</h5>
+            #end
+        #end
+
+        #if($letter.getOrganisations())
+            #foreach($organisation in $letter.getOrganisations())
+                #parse("templates/statusscreen/organisation.vm")
+            #end
+        #end
+        #if($letter.getResolution())
+            <h5 style="margin: 0px">Резолюция: $letter.getResolution()</h5>
+        #end
+    </div>
+</div>
